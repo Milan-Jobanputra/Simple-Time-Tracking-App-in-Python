@@ -1,8 +1,8 @@
 import tkinter as tk
+from tkinter import messagebox
 from datetime import datetime, timedelta
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.pdfgen import canvas
 
 class TimeTrackerApp:
     def __init__(self, master):
@@ -72,34 +72,22 @@ class TimeTrackerApp:
     
     def save_to_pdf(self, project, task, elapsed_time):
         pdf_filename = "time_tracker_log.pdf"
-        styles = getSampleStyleSheet()
+        c = canvas.Canvas(pdf_filename, pagesize=letter)
         
         try:
-            existing_entries = []
             with open(pdf_filename, "rb") as f:
-                existing_entries = f.readlines()
-            
-            doc = SimpleDocTemplate(pdf_filename, pagesize=letter)
-            story = []
-            
-            story.append(Paragraph("Time Tracker Log", styles['Title']))
-            story.append(Spacer(1, 12))
-            story.append(Paragraph(f"Date: {datetime.now().strftime('%Y-%m-%d')}", styles['Normal']))
-            story.append(Paragraph(f"Project Name: {project}", styles['Normal']))
-            story.append(Paragraph(f"Task Name: {task}", styles['Normal']))
-            story.append(Paragraph(f"Time Tracked: {str(elapsed_time)}", styles['Normal']))
-            story.append(Spacer(1, 12))
-            
-            for entry in existing_entries:
-                try:
-                    story.append(Paragraph(entry.decode("utf-8").strip(), styles['Normal']))
-                    story.append(Spacer(1, 12))
-                except UnicodeDecodeError:
-                    pass
-            
-            doc.build(story)
+                pdf_data = f.read()
+                c.drawString(100, 750 - len(pdf_data) * 0.015, "Date: " + datetime.now().strftime('%Y-%m-%d'))
+                c.drawString(100, 730 - len(pdf_data) * 0.015, "Project Name: " + project)
+                c.drawString(100, 710 - len(pdf_data) * 0.015, "Task Name: " + task)
+                c.drawString(100, 690 - len(pdf_data) * 0.015, "Time Tracked: " + str(elapsed_time))
         except FileNotFoundError:
-            pass
+            c.drawString(100, 750, "Date: " + datetime.now().strftime('%Y-%m-%d'))
+            c.drawString(100, 730, "Project Name: " + project)
+            c.drawString(100, 710, "Task Name: " + task)
+            c.drawString(100, 690, "Time Tracked: " + str(elapsed_time))
+        
+        c.save()
     
     def clear_timer(self):
         self.project_entry.delete(0, tk.END)
