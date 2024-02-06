@@ -70,7 +70,9 @@ class TimeTrackerApp:
             self.timer_label.config(text=str(elapsed).split(".")[0])
             self.timer_label.after(1000, self.update_timer)
     
-    def save_to_pdf(self, project, task, elapsed_time):
+    #add data to pdf file after stop the timer.
+
+    def save_to_pdf(self, project, task, elapsed_time): 
         pdf_filename = "time_tracker_log.pdf"
         c = canvas.Canvas(pdf_filename, pagesize=letter)
         
